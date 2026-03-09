@@ -39,6 +39,7 @@
       <a onclick="showPage('notices');closeMenu()" id="nav-notices">Notices</a>
       <a onclick="showPage('events');closeMenu()" id="nav-events">Events</a>
       <a onclick="showPage('achievements');closeMenu()" id="nav-achievements">Achievements</a>
+      <a onclick="showPage('jobs');closeMenu()" id="nav-jobs">Jobs</a>
       <a onclick="showPage('admin');closeMenu()" id="nav-admin">Admin</a>
       <button class="nav-btn nav-btn-mobile" onclick="showPage('register');closeMenu()">Join Alumni</button>
     </div>
@@ -265,7 +266,61 @@
   </section>
 </div>
 
-<!-- ==================== ADMIN PAGE ==================== -->
+<!-- ==================== JOBS PAGE ==================== -->
+<div class="page" id="page-jobs" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Opportunities</div>
+        <h2>Job Board</h2>
+        <p>Alumni দের জন্য job সুযোগ — share করুন, খুঁজুন, এগিয়ে যান।</p>
+      </div>
+
+      <!-- POST A JOB FORM -->
+      <div class="job-post-form" id="job-post-form">
+        <div class="job-form-header">
+          <div style="font-size:28px;">💼</div>
+          <div>
+            <div class="job-form-title">Post a Job</div>
+            <div class="job-form-subtitle">আপনার company তে কোনো opening আছে? Alumni দের জানান!</div>
+          </div>
+        </div>
+        <div class="job-form-grid">
+          <div class="form-group"><label>Job Title <span>*</span></label><input type="text" id="job-title" placeholder="e.g. Software Engineer"></div>
+          <div class="form-group"><label>Company Name <span>*</span></label><input type="text" id="job-company" placeholder="e.g. Grameenphone Ltd."></div>
+        </div>
+        <div class="job-form-grid">
+          <div class="form-group"><label>Location <span>*</span></label>
+            <select id="job-location-type">
+              <option value="">Select type...</option>
+              <option value="Remote">🌐 Remote</option>
+              <option value="Onsite">🏢 Onsite</option>
+              <option value="Hybrid">🔀 Hybrid</option>
+            </select>
+          </div>
+          <div class="form-group"><label>City / Location</label><input type="text" id="job-location-city" placeholder="e.g. Dhaka, Bangladesh"></div>
+        </div>
+        <div class="job-form-grid">
+          <div class="form-group"><label>Application Deadline <span>*</span></label><input type="date" id="job-deadline"></div>
+          <div class="form-group"><label>Contact / Apply Link <span>*</span></label><input type="text" id="job-apply" placeholder="Email or URL (https://...)"></div>
+        </div>
+        <div class="form-group" style="margin-top:4px;"><label>Job Description</label><textarea id="job-desc" rows="3" placeholder="Role details, requirements, salary range (optional)..."></textarea></div>
+        <div class="form-group"><label>Your Name (Posted by) <span>*</span></label><input type="text" id="job-poster" placeholder="Your name & batch (e.g. Rahim — Batch 2012)"></div>
+        <button class="btn-post-job" onclick="postJob()">📢 Post Job</button>
+      </div>
+
+      <!-- JOBS LIST -->
+      <div class="jobs-list" id="jobs-list">
+        <div class="jobs-empty" id="jobs-empty">
+          <div style="font-size:48px;margin-bottom:12px;">💼</div>
+          <p>এখনো কোনো job post নেই।<br>প্রথম হয়ে একটা post করুন!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+
 <div class="page" id="page-admin" style="padding-top:80px;">
   <section>
     <div class="section-inner">
@@ -473,7 +528,108 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<!-- JS FILES -->
+<!-- JOBS SCRIPT -->
+<script>
+// ---- JOBS LOGIC ----
+function getJobs() {
+  try { return JSON.parse(localStorage.getItem('alumni_jobs') || '[]'); } catch(e) { return []; }
+}
+function saveJobs(jobs) {
+  localStorage.setItem('alumni_jobs', JSON.stringify(jobs));
+}
+
+function postJob() {
+  const title   = document.getElementById('job-title').value.trim();
+  const company = document.getElementById('job-company').value.trim();
+  const locType = document.getElementById('job-location-type').value;
+  const locCity = document.getElementById('job-location-city').value.trim();
+  const deadline= document.getElementById('job-deadline').value;
+  const apply   = document.getElementById('job-apply').value.trim();
+  const desc    = document.getElementById('job-desc').value.trim();
+  const poster  = document.getElementById('job-poster').value.trim();
+
+  if (!title || !company || !locType || !deadline || !apply || !poster) {
+    alert('⚠️ সব required field পূরণ করুন!'); return;
+  }
+
+  const jobs = getJobs();
+  jobs.unshift({ id: Date.now(), title, company, locType, locCity, deadline, apply, desc, poster, date: new Date().toISOString() });
+  saveJobs(jobs);
+  renderJobs();
+
+  // Reset form
+  ['job-title','job-company','job-location-city','job-deadline','job-apply','job-desc','job-poster'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('job-location-type').value = '';
+
+  if (typeof showToast === 'function') showToast('✅ Job posted successfully!');
+  else alert('✅ Job posted!');
+}
+
+function deleteJob(id) {
+  if (!confirm('এই job post টা delete করবেন?')) return;
+  saveJobs(getJobs().filter(j => j.id !== id));
+  renderJobs();
+}
+
+function renderJobs() {
+  const jobs = getJobs();
+  const list  = document.getElementById('jobs-list');
+  const empty = document.getElementById('jobs-empty');
+  if (!list) return;
+
+  // Remove old cards
+  list.querySelectorAll('.job-card').forEach(c => c.remove());
+
+  if (jobs.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  jobs.forEach(j => {
+    const dl = new Date(j.deadline);
+    const expired = dl < today;
+    const dlStr = dl.toLocaleDateString('bn-BD', { day:'numeric', month:'long', year:'numeric' });
+    const isLink = j.apply.startsWith('http');
+
+    const card = document.createElement('div');
+    card.className = 'job-card' + (expired ? ' expired' : '');
+    card.innerHTML = `
+      <div class="job-card-top">
+        <div class="job-card-left">
+          <div class="job-card-title">${j.title}</div>
+          <div class="job-card-company">🏢 ${j.company}</div>
+        </div>
+        <div class="job-card-badges">
+          <span class="job-badge job-badge-type">${j.locType === 'Remote' ? '🌐' : j.locType === 'Hybrid' ? '🔀' : '🏢'} ${j.locType}</span>
+          ${expired ? '<span class="job-badge job-badge-expired">Expired</span>' : '<span class="job-badge job-badge-open">Hiring</span>'}
+        </div>
+      </div>
+      ${j.locCity ? `<div class="job-card-meta">📍 ${j.locCity}</div>` : ''}
+      ${j.desc ? `<div class="job-card-desc">${j.desc}</div>` : ''}
+      <div class="job-card-footer">
+        <div class="job-card-info">
+          <span>📅 Deadline: <strong>${dlStr}</strong></span>
+          <span class="job-posted-by">Posted by ${j.poster}</span>
+        </div>
+        <div class="job-card-actions">
+          ${isLink
+            ? `<a href="${j.apply}" target="_blank" class="btn-apply ${expired?'disabled':''}">Apply Now →</a>`
+            : `<a href="mailto:${j.apply}" class="btn-apply ${expired?'disabled':''}">📧 Contact</a>`}
+          <button class="btn-job-delete" onclick="deleteJob(${j.id})">🗑️</button>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+// Init on page load
+document.addEventListener('DOMContentLoaded', renderJobs);
+</script>
+
+
 <script src="js/utils.js"></script>
 <script src="js/directory.js"></script>
 <script src="js/notices.js"></script>
