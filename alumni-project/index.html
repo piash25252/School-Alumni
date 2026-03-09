@@ -32,16 +32,20 @@
 <nav>
   <div class="nav-inner">
     <div class="nav-logo" onclick="showPage('home')">Alumni<span> Network</span></div>
-    <div class="nav-links">
-      <a onclick="showPage('home')" class="active" id="nav-home">Home</a>
-      <a onclick="showPage('directory')" id="nav-directory">Directory</a>
-      <a onclick="showPage('memories')" id="nav-memories">Memory Wall</a>
-      <a onclick="showPage('notices')" id="nav-notices">Notices</a>
-      <a onclick="showPage('events')" id="nav-events">Events</a>
-      <a onclick="showPage('achievements')" id="nav-achievements">Achievements</a>
-      <a onclick="showPage('admin')" id="nav-admin">Admin</a>
+    <div class="nav-links" id="nav-links">
+      <a onclick="showPage('home');closeMenu()" class="active" id="nav-home">Home</a>
+      <a onclick="showPage('directory');closeMenu()" id="nav-directory">Directory</a>
+      <a onclick="showPage('memories');closeMenu()" id="nav-memories">Memory Wall</a>
+      <a onclick="showPage('notices');closeMenu()" id="nav-notices">Notices</a>
+      <a onclick="showPage('events');closeMenu()" id="nav-events">Events</a>
+      <a onclick="showPage('achievements');closeMenu()" id="nav-achievements">Achievements</a>
+      <a onclick="showPage('admin');closeMenu()" id="nav-admin">Admin</a>
+      <button class="nav-btn nav-btn-mobile" onclick="showPage('register');closeMenu()">Join Alumni</button>
     </div>
-    <button class="nav-btn" onclick="showPage('register')">Join Alumni</button>
+    <button class="nav-btn nav-btn-desktop" onclick="showPage('register')">Join Alumni</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
@@ -387,6 +391,82 @@
   <p style="margin-top:6px;">গ্রামঃ সাঁড়া ঝাউদিয়া, ডাকঘরঃ পাকশী, ঈশ্বরদী, পাবনা &nbsp;·&nbsp; EIIN: <span>125530</span> &nbsp;·&nbsp; <a href="https://sarajhaudiahighschool.edu.bd/" target="_blank" style="color:var(--gold);text-decoration:none;">sarajhaudiahighschool.edu.bd</a></p>
   <p style="margin-top:6px;font-size:11px;">🔥 Powered by Firebase Firestore</p>
 </footer>
+
+<!-- HAMBURGER MENU CSS & JS -->
+<style>
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1001;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--navy, #1a2744);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.nav-btn-mobile { display: none; }
+
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .nav-btn-desktop { display: none !important; }
+  .nav-btn-mobile { display: block; width: 100%; margin-top: 8px; }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 12px 20px 20px;
+    gap: 0 !important;
+    z-index: 1000;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+  }
+  .nav-links a:last-of-type { border-bottom: none; }
+}
+</style>
+<script>
+function toggleMenu() {
+  const menu = document.getElementById('nav-links');
+  const btn = document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-links').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+// Close menu when clicking outside
+document.addEventListener('click', function(e) {
+  const nav = document.querySelector('nav');
+  if (nav && !nav.contains(e.target)) closeMenu();
+});
+</script>
 
 <!-- JS FILES -->
 <script src="js/utils.js"></script>
