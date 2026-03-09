@@ -256,12 +256,15 @@
           <div style="font-size:40px;margin-bottom:12px;">🔐</div>
           <h2>Admin Login</h2>
           <p>Enter your credentials to access the admin panel</p>
-          <input type="text" id="admin-user" placeholder="Username">
+          <input type="email" id="admin-user" placeholder="Email Address">
           <input type="password" id="admin-pass" placeholder="Password">
           <button class="btn-login" onclick="adminLogin()">Login</button>
-          <p style="font-size:11px;color:var(--muted);margin-top:16px;">Demo credentials: admin / admin123</p>
+          <p style="margin-top:12px;"><a href="#" onclick="adminForgotPassword()" style="font-size:13px;color:var(--gold);text-decoration:none;">🔑 Forgot Password? Reset via Email</a></p>
         </div>
         <div class="admin-dashboard" id="admin-dashboard">
+          <div style="text-align:right;margin-bottom:16px;">
+            <button id="admin-logout-btn" onclick="adminLogout()" style="display:none;background:#ef4444;color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;">🚪 Logout</button>
+          </div>
           <div class="admin-stats-row">
             <div class="admin-stat"><div class="admin-stat-num" id="adm-total">0</div><div class="admin-stat-label">Total Alumni</div></div>
             <div class="admin-stat"><div class="admin-stat-num" id="adm-pending">0</div><div class="admin-stat-label">Pending</div></div>

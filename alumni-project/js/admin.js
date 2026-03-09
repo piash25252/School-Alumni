@@ -1,20 +1,60 @@
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 /* ============================================================
-   ADMIN PANEL — Firebase
+   ADMIN PANEL — Firebase Authentication
    ============================================================ */
 
-window.adminLogin = function() {
-  const username = document.getElementById('admin-user').value;
+import {
+  getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const auth = getAuth(getApp());
+
+/* ---- LOGIN ---- */
+window.adminLogin = async function() {
+  const email    = document.getElementById('admin-user').value.trim();
   const password = document.getElementById('admin-pass').value;
-  if (username === 'admin' && password === 'admin123') {
+
+  if (!email || !password) { showToast('⚠️ Email ও password দাও'); return; }
+
+  try {
+    showToast('⏳ Logging in...');
+    await signInWithEmailAndPassword(auth, email, password);
     document.getElementById('admin-login').style.display     = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
+    document.getElementById('admin-logout-btn').style.display = 'inline-block';
     refreshAdmin();
     showToast('👋 Welcome, Admin!');
-  } else {
-    showToast('❌ Invalid credentials');
+  } catch(e) {
+    showToast('❌ Invalid email or password');
+    console.error(e);
   }
-}
+};
 
+/* ---- LOGOUT ---- */
+window.adminLogout = async function() {
+  await signOut(auth);
+  document.getElementById('admin-login').style.display     = 'block';
+  document.getElementById('admin-dashboard').style.display = 'none';
+  document.getElementById('admin-logout-btn').style.display = 'none';
+  document.getElementById('admin-user').value = '';
+  document.getElementById('admin-pass').value = '';
+  showToast('👋 Logged out.');
+};
+
+/* ---- FORGOT PASSWORD ---- */
+window.adminForgotPassword = async function() {
+  const email = document.getElementById('admin-user').value.trim();
+  if (!email) { showToast('⚠️ আগে email দাও'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showToast('📧 Password reset email পাঠানো হয়েছে!');
+  } catch(e) {
+    showToast('❌ Email পাঠানো যায়নি। Email ঠিক আছে?');
+    console.error(e);
+  }
+};
+
+/* ---- REFRESH ---- */
 window.refreshAdmin = function() {
   const approved = getApproved();
   const pending  = getPending();
@@ -27,14 +67,14 @@ window.refreshAdmin = function() {
   renderNoticesTable();
   renderEventsTable();
   renderAchieveTable();
-}
+};
 
 window.adminTab = function(name, buttonEl) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-panel-section').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (buttonEl) buttonEl.classList.add('active');
-}
+};
 
 /* ---- PENDING ---- */
 window.renderPendingTable = function() {
@@ -53,15 +93,15 @@ window.renderPendingTable = function() {
         <button class="btn-reject"  onclick="rejectAlumni('${a.id}')">Reject</button>
       </td>
     </tr>`).join('');
-}
+};
 
 window.approveAlumni = async function(id) {
   try {
     await fbApproveAlumni(id);
     refreshAdmin();
     showToast('✅ Alumni approved!');
-  } catch(e) { showToast('❌ Error. Try again.'); console.error(e); }
-}
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
+};
 
 window.rejectAlumni = async function(id) {
   try {
@@ -69,7 +109,7 @@ window.rejectAlumni = async function(id) {
     refreshAdmin();
     showToast('❌ Entry rejected.');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 /* ---- APPROVED ---- */
 window.renderApprovedTable = function() {
@@ -80,17 +120,17 @@ window.renderApprovedTable = function() {
       <td><strong>${a.name}</strong></td><td>${a.batch}</td><td>${a.profession}</td><td>${a.location}</td>
       <td><button class="btn-delete" onclick="deleteAlumni('${a.id}')">Remove</button></td>
     </tr>`).join('');
-}
+};
 
 window.deleteAlumni = async function(id) {
-  if (!confirm('Remove this alumni from the directory?')) return;
+  if (!confirm('Remove this alumni?')) return;
   try {
     await fbDeleteAlumni(id);
     refreshAdmin();
     renderDirectory(getApproved());
     showToast('Removed.');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 /* ---- NOTICES ---- */
 window.renderNoticesTable = function() {
@@ -100,7 +140,7 @@ window.renderNoticesTable = function() {
       <td>${n.type}</td><td>${n.title}</td><td>${n.date}</td>
       <td><button class="btn-delete" onclick="deleteNotice('${n.id}')">Delete</button></td>
     </tr>`).join('');
-}
+};
 
 window.addNotice = async function() {
   const type  = document.getElementById('notice-type').value;
@@ -108,24 +148,21 @@ window.addNotice = async function() {
   const body  = document.getElementById('notice-body').value.trim();
   if (!title || !body) { showToast('⚠️ Fill all fields'); return; }
   try {
-    const notice = { type, title, body };
-    await fbAddNotice(notice);
-    renderNoticesTable();
-    renderNotices();
+    await fbAddNotice({ type, title, body });
+    renderNoticesTable(); renderNotices();
     showToast('📌 Notice added!');
     document.getElementById('notice-title').value = '';
     document.getElementById('notice-body').value  = '';
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 window.deleteNotice = async function(id) {
   try {
     await fbDeleteNotice(id);
-    renderNoticesTable();
-    renderNotices();
+    renderNoticesTable(); renderNotices();
     showToast('Deleted.');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 /* ---- EVENTS ---- */
 window.renderEventsTable = function() {
@@ -135,7 +172,7 @@ window.renderEventsTable = function() {
       <td>${e.title}</td><td>${e.date}</td><td>${e.location}</td>
       <td><button class="btn-delete" onclick="deleteEvent('${e.id}')">Delete</button></td>
     </tr>`).join('');
-}
+};
 
 window.addEvent = async function() {
   const title    = document.getElementById('event-title').value.trim();
@@ -144,23 +181,20 @@ window.addEvent = async function() {
   const desc     = document.getElementById('event-desc').value.trim();
   if (!title || !date || !location) { showToast('⚠️ Fill all fields'); return; }
   try {
-    const ev = { title, date, location, desc };
-    await fbAddEvent(ev);
-    renderEventsTable();
-    renderEvents();
+    await fbAddEvent({ title, date, location, desc });
+    renderEventsTable(); renderEvents();
     showToast('📅 Event added!');
     ['event-title','event-date','event-location','event-desc'].forEach(id => document.getElementById(id).value = '');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 window.deleteEvent = async function(id) {
   try {
     await fbDeleteEvent(id);
-    renderEventsTable();
-    renderEvents();
+    renderEventsTable(); renderEvents();
     showToast('Deleted.');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 /* ---- ACHIEVEMENTS ---- */
 window.renderAchieveTable = function() {
@@ -170,7 +204,7 @@ window.renderAchieveTable = function() {
       <td>${a.name}</td><td>${a.batch}</td><td>${a.title}</td>
       <td><button class="btn-delete" onclick="deleteAchieve('${a.id}')">Delete</button></td>
     </tr>`).join('');
-}
+};
 
 window.addAchievement = async function() {
   const name  = document.getElementById('achieve-name').value.trim();
@@ -180,23 +214,20 @@ window.addAchievement = async function() {
   const icon  = document.getElementById('achieve-icon').value.trim() || '🏆';
   if (!name || !title) { showToast('⚠️ Fill all fields'); return; }
   try {
-    const item = { name, batch, title, desc, icon };
-    await fbAddAchievement(item);
-    renderAchieveTable();
-    renderAchievements();
+    await fbAddAchievement({ name, batch, title, desc, icon });
+    renderAchieveTable(); renderAchievements();
     showToast('🏆 Achievement featured!');
     ['achieve-name','achieve-batch','achieve-title','achieve-desc','achieve-icon'].forEach(id => document.getElementById(id).value = '');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 window.deleteAchieve = async function(id) {
   try {
     await fbDeleteAchievement(id);
-    renderAchieveTable();
-    renderAchievements();
+    renderAchieveTable(); renderAchievements();
     showToast('Deleted.');
   } catch(e) { showToast('❌ Error.'); console.error(e); }
-}
+};
 
 /* ---- SCHOOL PHOTO ---- */
 window.changeSchoolPhoto = function(input) {
@@ -216,7 +247,7 @@ window.changeSchoolPhoto = function(input) {
     } catch(e) { showToast('❌ Photo save failed.'); console.error(e); }
   };
   reader.readAsDataURL(input.files[0]);
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const label = document.getElementById('school-upload-label');
@@ -238,4 +269,4 @@ window.exportCSV = function() {
   const link = document.createElement('a');
   link.href = url; link.download = 'alumni-list.csv'; link.click();
   showToast('📥 CSV exported!');
-}
+};
