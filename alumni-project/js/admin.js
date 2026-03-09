@@ -1,21 +1,12 @@
 /* ============================================================
-   ADMIN PANEL
-   File: js/admin.js
-   - Login
-   - Approve / reject alumni
-   - Add / delete notices, events, achievements
-   - Export CSV
+   ADMIN PANEL — Firebase
    ============================================================ */
 
-/* ---------- LOGIN ---------- */
-
-function adminLogin() {
+window.adminLogin = function() {
   const username = document.getElementById('admin-user').value;
   const password = document.getElementById('admin-pass').value;
-
-  // ⚠️ Change these credentials before going live!
   if (username === 'admin' && password === 'admin123') {
-    document.getElementById('admin-login').style.display    = 'none';
+    document.getElementById('admin-login').style.display     = 'none';
     document.getElementById('admin-dashboard').style.display = 'block';
     refreshAdmin();
     showToast('👋 Welcome, Admin!');
@@ -24,17 +15,13 @@ function adminLogin() {
   }
 }
 
-/* ---------- REFRESH DASHBOARD ---------- */
-
-function refreshAdmin() {
+window.refreshAdmin = function() {
   const approved = getApproved();
   const pending  = getPending();
-
   document.getElementById('adm-total').textContent   = approved.length;
   document.getElementById('adm-pending').textContent  = pending.length;
   document.getElementById('adm-stories').textContent  = DATA.stories.length;
   document.getElementById('adm-events').textContent   = DATA.events.length;
-
   renderPendingTable();
   renderApprovedTable();
   renderNoticesTable();
@@ -42,229 +29,213 @@ function refreshAdmin() {
   renderAchieveTable();
 }
 
-/* ---------- TAB SWITCHING ---------- */
-
-function adminTab(name, buttonEl) {
+window.adminTab = function(name, buttonEl) {
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.admin-panel-section').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   if (buttonEl) buttonEl.classList.add('active');
 }
 
-/* ---------- PENDING ALUMNI ---------- */
-
-function renderPendingTable() {
+/* ---- PENDING ---- */
+window.renderPendingTable = function() {
   const pending = getPending();
   const tbody   = document.getElementById('pending-tbody');
-
   if (!pending.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No pending registrations</td></tr>';
     return;
   }
-
   tbody.innerHTML = pending.map(a => `
     <tr>
       <td><strong>${a.name}</strong></td>
-      <td>${a.batch}</td>
-      <td>${a.ssc}</td>
-      <td>${a.profession}</td>
-      <td>${a.location}</td>
+      <td>${a.batch}</td><td>${a.ssc}</td><td>${a.profession}</td><td>${a.location}</td>
       <td>
-        <button class="btn-approve" onclick="approveAlumni(${a.id})">Approve</button>
-        <button class="btn-reject"  onclick="rejectAlumni(${a.id})">Reject</button>
+        <button class="btn-approve" onclick="approveAlumni('${a.id}')">Approve</button>
+        <button class="btn-reject"  onclick="rejectAlumni('${a.id}')">Reject</button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`).join('');
 }
 
-function approveAlumni(id) {
-  const found = DATA.alumni.find(a => a.id === id);
-  if (found) { found.status = 'approved'; saveData(); refreshAdmin(); showToast('✅ Alumni approved!'); }
+window.approveAlumni = async function(id) {
+  try {
+    await fbApproveAlumni(id);
+    refreshAdmin();
+    showToast('✅ Alumni approved!');
+  } catch(e) { showToast('❌ Error. Try again.'); console.error(e); }
 }
 
-function rejectAlumni(id) {
-  DATA.alumni = DATA.alumni.filter(a => a.id !== id);
-  saveData(); refreshAdmin(); showToast('❌ Entry rejected.');
+window.rejectAlumni = async function(id) {
+  try {
+    await fbRejectAlumni(id);
+    refreshAdmin();
+    showToast('❌ Entry rejected.');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-/* ---------- APPROVED ALUMNI ---------- */
-
-function renderApprovedTable() {
+/* ---- APPROVED ---- */
+window.renderApprovedTable = function() {
   const approved = getApproved();
   const tbody    = document.getElementById('approved-tbody');
   tbody.innerHTML = approved.map(a => `
     <tr>
-      <td><strong>${a.name}</strong></td>
-      <td>${a.batch}</td>
-      <td>${a.profession}</td>
-      <td>${a.location}</td>
-      <td><button class="btn-delete" onclick="deleteAlumni(${a.id})">Remove</button></td>
-    </tr>
-  `).join('');
+      <td><strong>${a.name}</strong></td><td>${a.batch}</td><td>${a.profession}</td><td>${a.location}</td>
+      <td><button class="btn-delete" onclick="deleteAlumni('${a.id}')">Remove</button></td>
+    </tr>`).join('');
 }
 
-function deleteAlumni(id) {
+window.deleteAlumni = async function(id) {
   if (!confirm('Remove this alumni from the directory?')) return;
-  DATA.alumni = DATA.alumni.filter(a => a.id !== id);
-  saveData(); refreshAdmin(); showToast('Removed.');
+  try {
+    await fbDeleteAlumni(id);
+    refreshAdmin();
+    renderDirectory(getApproved());
+    showToast('Removed.');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-/* ---------- NOTICES ---------- */
-
-function renderNoticesTable() {
+/* ---- NOTICES ---- */
+window.renderNoticesTable = function() {
   const tbody = document.getElementById('notices-tbody');
   tbody.innerHTML = DATA.notices.map(n => `
     <tr>
-      <td>${n.type}</td>
-      <td>${n.title}</td>
-      <td>${n.date}</td>
-      <td><button class="btn-delete" onclick="deleteNotice(${n.id})">Delete</button></td>
-    </tr>
-  `).join('');
+      <td>${n.type}</td><td>${n.title}</td><td>${n.date}</td>
+      <td><button class="btn-delete" onclick="deleteNotice('${n.id}')">Delete</button></td>
+    </tr>`).join('');
 }
 
-function addNotice() {
+window.addNotice = async function() {
   const type  = document.getElementById('notice-type').value;
   const title = document.getElementById('notice-title').value.trim();
   const body  = document.getElementById('notice-body').value.trim();
   if (!title || !body) { showToast('⚠️ Fill all fields'); return; }
-
-  DATA.notices.unshift({
-    id:    Date.now(),
-    type, title, body,
-    date:  new Date().toISOString().split('T')[0]
-  });
-  saveData();
-  renderNoticesTable();
-  renderNotices();
-  showToast('📌 Notice added!');
-  document.getElementById('notice-title').value = '';
-  document.getElementById('notice-body').value  = '';
+  try {
+    const notice = { type, title, body };
+    await fbAddNotice(notice);
+    renderNoticesTable();
+    renderNotices();
+    showToast('📌 Notice added!');
+    document.getElementById('notice-title').value = '';
+    document.getElementById('notice-body').value  = '';
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-function deleteNotice(id) {
-  DATA.notices = DATA.notices.filter(n => n.id !== id);
-  saveData(); renderNoticesTable(); showToast('Deleted.');
+window.deleteNotice = async function(id) {
+  try {
+    await fbDeleteNotice(id);
+    renderNoticesTable();
+    renderNotices();
+    showToast('Deleted.');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-/* ---------- EVENTS ---------- */
-
-function renderEventsTable() {
+/* ---- EVENTS ---- */
+window.renderEventsTable = function() {
   const tbody = document.getElementById('events-tbody');
   tbody.innerHTML = DATA.events.map(e => `
     <tr>
-      <td>${e.title}</td>
-      <td>${e.date}</td>
-      <td>${e.location}</td>
-      <td><button class="btn-delete" onclick="deleteEvent(${e.id})">Delete</button></td>
-    </tr>
-  `).join('');
+      <td>${e.title}</td><td>${e.date}</td><td>${e.location}</td>
+      <td><button class="btn-delete" onclick="deleteEvent('${e.id}')">Delete</button></td>
+    </tr>`).join('');
 }
 
-function addEvent() {
+window.addEvent = async function() {
   const title    = document.getElementById('event-title').value.trim();
   const date     = document.getElementById('event-date').value;
   const location = document.getElementById('event-location').value.trim();
   const desc     = document.getElementById('event-desc').value.trim();
   if (!title || !date || !location) { showToast('⚠️ Fill all fields'); return; }
-
-  DATA.events.push({ id: Date.now(), title, date, location, desc });
-  saveData();
-  renderEventsTable();
-  renderEvents();
-  showToast('📅 Event added!');
-  document.getElementById('event-title').value    = '';
-  document.getElementById('event-date').value     = '';
-  document.getElementById('event-location').value = '';
-  document.getElementById('event-desc').value     = '';
+  try {
+    const ev = { title, date, location, desc };
+    await fbAddEvent(ev);
+    renderEventsTable();
+    renderEvents();
+    showToast('📅 Event added!');
+    ['event-title','event-date','event-location','event-desc'].forEach(id => document.getElementById(id).value = '');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-function deleteEvent(id) {
-  DATA.events = DATA.events.filter(e => e.id !== id);
-  saveData(); renderEventsTable(); showToast('Deleted.');
+window.deleteEvent = async function(id) {
+  try {
+    await fbDeleteEvent(id);
+    renderEventsTable();
+    renderEvents();
+    showToast('Deleted.');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-/* ---------- ACHIEVEMENTS ---------- */
-
-function renderAchieveTable() {
+/* ---- ACHIEVEMENTS ---- */
+window.renderAchieveTable = function() {
   const tbody = document.getElementById('achieve-tbody');
   tbody.innerHTML = DATA.achievements.map(a => `
     <tr>
-      <td>${a.name}</td>
-      <td>${a.batch}</td>
-      <td>${a.title}</td>
-      <td><button class="btn-delete" onclick="deleteAchieve(${a.id})">Delete</button></td>
-    </tr>
-  `).join('');
+      <td>${a.name}</td><td>${a.batch}</td><td>${a.title}</td>
+      <td><button class="btn-delete" onclick="deleteAchieve('${a.id}')">Delete</button></td>
+    </tr>`).join('');
 }
 
-function addAchievement() {
+window.addAchievement = async function() {
   const name  = document.getElementById('achieve-name').value.trim();
   const batch = document.getElementById('achieve-batch').value.trim();
   const title = document.getElementById('achieve-title').value.trim();
   const desc  = document.getElementById('achieve-desc').value.trim();
   const icon  = document.getElementById('achieve-icon').value.trim() || '🏆';
   if (!name || !title) { showToast('⚠️ Fill all fields'); return; }
-
-  DATA.achievements.push({ id: Date.now(), name, batch, title, desc, icon });
-  saveData();
-  renderAchieveTable();
-  renderAchievements();
-  showToast('🏆 Achievement featured!');
-  ['achieve-name','achieve-batch','achieve-title','achieve-desc','achieve-icon']
-    .forEach(id => document.getElementById(id).value = '');
+  try {
+    const item = { name, batch, title, desc, icon };
+    await fbAddAchievement(item);
+    renderAchieveTable();
+    renderAchievements();
+    showToast('🏆 Achievement featured!');
+    ['achieve-name','achieve-batch','achieve-title','achieve-desc','achieve-icon'].forEach(id => document.getElementById(id).value = '');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-function deleteAchieve(id) {
-  DATA.achievements = DATA.achievements.filter(a => a.id !== id);
-  saveData(); renderAchieveTable(); showToast('Deleted.');
+window.deleteAchieve = async function(id) {
+  try {
+    await fbDeleteAchievement(id);
+    renderAchieveTable();
+    renderAchievements();
+    showToast('Deleted.');
+  } catch(e) { showToast('❌ Error.'); console.error(e); }
 }
 
-/* ---------- SCHOOL PHOTO CHANGE ---------- */
-
-function changeSchoolPhoto(input) {
+/* ---- SCHOOL PHOTO ---- */
+window.changeSchoolPhoto = function(input) {
   if (!input.files || !input.files[0]) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     const dataUrl = e.target.result;
-    // Update home page photo
-    const homeImg = document.getElementById('school-photo-img');
-    if (homeImg) homeImg.src = dataUrl;
-    // Update admin preview
-    const adminPreview = document.getElementById('admin-school-preview');
-    if (adminPreview) adminPreview.src = dataUrl;
-    // Save to localStorage
-    try { localStorage.setItem('school_photo', dataUrl); } catch(e) {}
-    // Show success
-    document.getElementById('school-photo-success').style.display = 'block';
-    setTimeout(() => {
-      document.getElementById('school-photo-success').style.display = 'none';
-    }, 3000);
-    showToast('🖼️ School photo updated!');
+    const homeImg  = document.getElementById('school-photo-img');
+    const adminImg = document.getElementById('admin-school-preview');
+    if (homeImg)  homeImg.src  = dataUrl;
+    if (adminImg) adminImg.src = dataUrl;
+    try {
+      await fbSaveSchoolPhoto(dataUrl);
+      document.getElementById('school-photo-success').style.display = 'block';
+      setTimeout(() => { document.getElementById('school-photo-success').style.display = 'none'; }, 3000);
+      showToast('🖼️ School photo updated!');
+    } catch(e) { showToast('❌ Photo save failed.'); console.error(e); }
   };
   reader.readAsDataURL(input.files[0]);
 }
 
-// Make label clickable
 document.addEventListener('DOMContentLoaded', () => {
   const label = document.getElementById('school-upload-label');
   if (label) label.onclick = () => document.getElementById('school-photo-upload').click();
 });
 
-function exportCSV() {
+/* ---- CSV EXPORT ---- */
+window.exportCSV = function() {
   const approved = getApproved();
   const headers  = ['Name','Phone','Email','Location','Batch','SSC Year','University','Field','Profession','Company','Date'];
   const rows     = approved.map(a =>
     [a.name,a.phone,a.email,a.location,a.batch,a.ssc,a.university,a.field,a.profession,a.company,a.date]
-      .map(v => `"${(v || '').toString().replace(/"/g, '""')}"`)
+      .map(v => `"${(v||'').toString().replace(/"/g,'""')}"`)
       .join(',')
   );
   const csv  = [headers.join(','), ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url  = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href     = url;
-  link.download = 'alumni-list.csv';
-  link.click();
+  link.href = url; link.download = 'alumni-list.csv'; link.click();
   showToast('📥 CSV exported!');
 }

@@ -1,11 +1,8 @@
 /* ============================================================
-   APP INIT
-   File: js/app.js
-   - Runs on page load
-   - Initialises data and home page stats
+   APP INIT — Firebase
    ============================================================ */
 
-function updateStats() {
+window.updateStats = function() {
   const approved  = getApproved();
   const batches   = [...new Set(approved.map(a => a.ssc))].length;
   const countries = [...new Set(
@@ -18,17 +15,11 @@ function updateStats() {
   animateCount('stat-countries', countries);
 }
 
-// Boot
-loadData();
-updateStats();
-
-// Load saved school photo if any
-try {
-  const savedPhoto = localStorage.getItem('school_photo');
-  if (savedPhoto) {
-    const img = document.getElementById('school-photo-img');
-    const adminImg = document.getElementById('admin-school-preview');
-    if (img) img.src = savedPhoto;
-    if (adminImg) adminImg.src = savedPhoto;
+// Boot — loadData() is defined in data.js (ES module), called after module loads
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof loadData === 'function') {
+    loadData().then(() => {
+      if (typeof fbLoadSchoolPhoto === 'function') fbLoadSchoolPhoto();
+    });
   }
-} catch(e) {}
+});
