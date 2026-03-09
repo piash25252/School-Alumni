@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alumni Network — সাঁড়া ঝাউদিয়া উচ্চ বিদ্যালয়</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">Alumni<span> Network</span></div>
+    <div class="nav-links">
+      <a onclick="showPage('home')" class="active" id="nav-home">Home</a>
+      <a onclick="showPage('directory')" id="nav-directory">Directory</a>
+      <a onclick="showPage('memories')" id="nav-memories">Memory Wall</a>
+      <a onclick="showPage('notices')" id="nav-notices">Notices</a>
+      <a onclick="showPage('events')" id="nav-events">Events</a>
+      <a onclick="showPage('achievements')" id="nav-achievements">Achievements</a>
+      <a onclick="showPage('admin')" id="nav-admin">Admin</a>
+    </div>
+    <button class="nav-btn" onclick="showPage('register')">Join Alumni</button>
+  </div>
+</nav>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
+
+<!-- ==================== HOME PAGE ==================== -->
+<div class="page active" id="page-home">
+
+  <!-- SCHOOL PHOTO BANNER -->
+  <div class="school-photo-wrap" id="school-photo-wrap">
+    <img id="school-photo-img" src="school.jpg" alt="সাঁড়া ঝাউদিয়া উচ্চ বিদ্যালয়">
+    <div class="school-photo-overlay">
+      <div class="school-name-box">
+        <div class="school-name-bn">সাঁড়া ঝাউদিয়া উচ্চ বিদ্যালয়</div>
+        <div class="school-name-en">Sara Jhaudia High School</div>
+        <div class="school-meta-row">
+          <span>📍 গ্রামঃ সাঁড়া ঝাউদিয়া, পাকশী, ঈশ্বরদী, পাবনা</span>
+          <span class="school-meta-divider">·</span>
+          <span>EIIN: 125530</span>
+          <span class="school-meta-divider">·</span>
+          <a href="https://sarajhaudiahighschool.edu.bd/" target="_blank" class="school-web-link">🌐 Official Website</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-dots"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><span>🎓 সাঁড়া ঝাউদিয়া উচ্চ বিদ্যালয় — Alumni Network</span></div>
+      <h1>Where <em>Old Friendships</em> Never Fade</h1>
+      <p>Reconnect with your batchmates, share your journey, and celebrate the memories that shaped who you are today.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('register')">Register as Alumni</button>
+        <button class="btn-outline" onclick="showPage('directory')">Browse Directory</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-num" id="stat-alumni">0</div><div class="stat-label">Alumni Registered</div></div>
+        <div class="stat"><div class="stat-num" id="stat-batches">0</div><div class="stat-label">Batches</div></div>
+        <div class="stat"><div class="stat-num" id="stat-stories">0</div><div class="stat-label">Stories Shared</div></div>
+        <div class="stat"><div class="stat-num" id="stat-countries">0</div><div class="stat-label">Countries</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== REGISTER PAGE ==================== -->
+<div class="page" id="page-register" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Join Us</div>
+        <h2>Alumni Registration</h2>
+        <p>Fill in your details to join our growing alumni community.</p>
+      </div>
+      <div class="form-wrap">
+        <div class="form-title">Tell Us About Yourself</div>
+        <div class="form-subtitle">All fields marked with * are required</div>
+
+        <div class="form-section-title">Personal Information</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Full Name <span>*</span></label><input type="text" id="reg-name" placeholder="Your full name"></div>
+          <div class="form-group"><label>Phone Number</label><input type="tel" id="reg-phone" placeholder="+880 1XX XXXX XXXX"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="you@email.com"></div>
+          <div class="form-group"><label>Current City / Country <span>*</span></label><input type="text" id="reg-location" placeholder="e.g. Dhaka, Bangladesh"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Facebook Profile URL</label><input type="url" id="reg-facebook" placeholder="https://facebook.com/yourname"></div>
+          <div class="form-group"><label>LinkedIn Profile URL</label><input type="url" id="reg-linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+        </div>
+
+        <div class="form-spacer"></div>
+        <div class="form-section-title">School Information</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Batch Name / Number <span>*</span></label><input type="text" id="reg-batch" placeholder="e.g. Batch 2010"></div>
+          <div class="form-group"><label>SSC Year <span>*</span></label><input type="number" id="reg-ssc" placeholder="e.g. 2010" min="1970" max="2030"></div>
+        </div>
+        <div class="form-grid full">
+          <div class="form-group"><label>Favourite Teacher's Name</label><input type="text" id="reg-teacher" placeholder="The teacher who inspired you most"></div>
+        </div>
+        <div class="form-grid full">
+          <div class="form-group"><label>A Special Memory from School</label><textarea id="reg-memory" rows="3" placeholder="Share a cherished memory from your school days..."></textarea></div>
+        </div>
+
+        <div class="form-spacer"></div>
+        <div class="form-section-title">Education & Career</div>
+        <div class="form-grid">
+          <div class="form-group"><label>University / Higher Education</label><input type="text" id="reg-university" placeholder="e.g. BUET, DU, NSU"></div>
+          <div class="form-group"><label>Field of Study</label><input type="text" id="reg-field" placeholder="e.g. Computer Science"></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Current Profession <span>*</span></label><input type="text" id="reg-profession" placeholder="e.g. Software Engineer, Doctor"></div>
+          <div class="form-group"><label>Organization / Company</label><input type="text" id="reg-company" placeholder="Where you work"></div>
+        </div>
+
+        <div class="form-spacer"></div>
+        <div class="form-section-title">Profile Photo (Optional)</div>
+        <label class="photo-upload" id="photo-upload-label" onclick="document.getElementById('reg-photo').click()">
+          <img id="photo-preview" class="photo-preview" src="" alt="preview">
+          <div id="photo-placeholder">
+            <div style="font-size:32px;">📷</div>
+            <p>Click to upload your photo</p>
+            <p style="font-size:11px;color:#9ca3af;">JPG, PNG up to 5MB</p>
+          </div>
+          <input type="file" id="reg-photo" accept="image/*" onchange="previewPhoto(this)">
+        </label>
+
+        <button class="form-submit" onclick="submitRegistration()">Submit Registration</button>
+        <div class="success-msg" id="reg-success">🎉 Registration submitted! Welcome to the alumni family.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== DIRECTORY PAGE ==================== -->
+<div class="page" id="page-directory" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Find Alumni</div>
+        <h2>Alumni Directory</h2>
+        <p>Search by name, profession, location, batch year, or university.</p>
+      </div>
+      <div class="search-bar-wrap">
+        <div class="search-row">
+          <div class="search-field"><label>Name</label><input type="text" id="s-name" placeholder="Search by name..."></div>
+          <div class="search-field"><label>Profession / Job</label><input type="text" id="s-job" placeholder="e.g. Doctor, Engineer..."></div>
+          <div class="search-field"><label>City / Country</label><input type="text" id="s-location" placeholder="e.g. Canada, Dhaka..."></div>
+          <div class="search-field"><label>Batch Year</label><input type="number" id="s-batch" placeholder="e.g. 2010"></div>
+          <button class="btn-search" onclick="searchAlumni()">Search</button>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:10px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">University</label>
+            <input type="text" id="s-university" placeholder="Search by university..." class="search-uni-input">
+          </div>
+          <button class="btn-search" onclick="searchAlumni()" style="margin-top:18px;">Filter</button>
+          <button onclick="clearSearch()" class="btn-clear" style="margin-top:18px;">Clear</button>
+        </div>
+      </div>
+      <div id="directory-results" class="alumni-grid"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== MEMORY WALL PAGE ==================== -->
+<div class="page" id="page-memories" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Memories</div>
+        <h2>Memory Wall</h2>
+        <p>Share your school life stories. The good times, the lessons, the friendships.</p>
+      </div>
+      <div class="story-form">
+        <h3>✍️ Share Your Story</h3>
+        <input type="text" id="story-title" placeholder="Give your story a title...">
+        <textarea id="story-body" rows="5" placeholder="Write your school memory or story here..."></textarea>
+        <div class="story-form-row">
+          <label class="anon-check"><input type="checkbox" id="story-anon"> Post anonymously</label>
+          <label class="story-photo-btn">
+            📷 Add Photo
+            <input type="file" id="story-photo" accept="image/*" onchange="previewStoryPhoto(this)">
+          </label>
+          <span id="story-photo-name" style="font-size:12px;color:var(--muted);"></span>
+          <button class="btn-post" onclick="postStory()">Post Story</button>
+        </div>
+      </div>
+      <div class="stories-list" id="stories-list"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== NOTICES PAGE ==================== -->
+<div class="page" id="page-notices" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Updates</div>
+        <h2>Notice Board</h2>
+        <p>Important announcements and updates for the alumni community.</p>
+      </div>
+      <div class="notices-grid" id="notices-grid"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== EVENTS PAGE ==================== -->
+<div class="page" id="page-events" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Coming Up</div>
+        <h2>Reunion & Events</h2>
+        <p>Don't miss out on upcoming alumni gatherings and celebrations.</p>
+      </div>
+      <div class="events-list" id="events-list"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== ACHIEVEMENTS PAGE ==================== -->
+<div class="page" id="page-achievements" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Pride</div>
+        <h2>Alumni Achievements</h2>
+        <p>Celebrating the remarkable accomplishments of our alumni family.</p>
+      </div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== ADMIN PAGE ==================== -->
+<div class="page" id="page-admin" style="padding-top:80px;">
+  <section>
+    <div class="section-inner">
+      <div class="section-header">
+        <div class="section-tag">Admin</div>
+        <h2>Admin Panel</h2>
+        <p>Manage alumni registrations, events, notices, and achievements.</p>
+      </div>
+      <div class="admin-wrap">
+        <div class="admin-login" id="admin-login">
+          <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+          <h2>Admin Login</h2>
+          <p>Enter your credentials to access the admin panel</p>
+          <input type="text" id="admin-user" placeholder="Username">
+          <input type="password" id="admin-pass" placeholder="Password">
+          <button class="btn-login" onclick="adminLogin()">Login</button>
+          <p style="font-size:11px;color:var(--muted);margin-top:16px;">Demo credentials: admin / admin123</p>
+        </div>
+        <div class="admin-dashboard" id="admin-dashboard">
+          <div class="admin-stats-row">
+            <div class="admin-stat"><div class="admin-stat-num" id="adm-total">0</div><div class="admin-stat-label">Total Alumni</div></div>
+            <div class="admin-stat"><div class="admin-stat-num" id="adm-pending">0</div><div class="admin-stat-label">Pending</div></div>
+            <div class="admin-stat"><div class="admin-stat-num" id="adm-stories">0</div><div class="admin-stat-label">Stories</div></div>
+            <div class="admin-stat"><div class="admin-stat-num" id="adm-events">0</div><div class="admin-stat-label">Events</div></div>
+          </div>
+          <div class="admin-tabs">
+            <button class="admin-tab active" onclick="adminTab('pending', this)">⏳ Pending</button>
+            <button class="admin-tab" onclick="adminTab('approved', this)">✅ Approved</button>
+            <button class="admin-tab" onclick="adminTab('notices-mgmt', this)">📌 Notices</button>
+            <button class="admin-tab" onclick="adminTab('events-mgmt', this)">📅 Events</button>
+            <button class="admin-tab" onclick="adminTab('achieve-mgmt', this)">🏆 Achievements</button>
+            <button class="admin-tab" onclick="adminTab('photo-mgmt', this)">🖼️ School Photo</button>
+          </div>
+
+          <div class="admin-panel-section active" id="panel-pending">
+            <table class="admin-table"><thead><tr><th>Name</th><th>Batch</th><th>SSC</th><th>Profession</th><th>Location</th><th>Action</th></tr></thead>
+            <tbody id="pending-tbody"></tbody></table>
+          </div>
+
+          <div class="admin-panel-section" id="panel-approved">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+              <button class="btn-export" onclick="exportCSV()">⬇️ Export CSV</button>
+            </div>
+            <table class="admin-table"><thead><tr><th>Name</th><th>Batch</th><th>Profession</th><th>Location</th><th>Action</th></tr></thead>
+            <tbody id="approved-tbody"></tbody></table>
+          </div>
+
+          <div class="admin-panel-section" id="panel-notices-mgmt">
+            <div class="add-form">
+              <h3>Add New Notice</h3>
+              <select id="notice-type"><option>Announcement</option><option>Important</option><option>Event</option><option>General</option></select>
+              <input type="text" id="notice-title" placeholder="Notice title">
+              <textarea id="notice-body" rows="3" placeholder="Notice content..."></textarea>
+              <button class="btn-add" onclick="addNotice()">Add Notice</button>
+            </div>
+            <table class="admin-table"><thead><tr><th>Type</th><th>Title</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody id="notices-tbody"></tbody></table>
+          </div>
+
+          <div class="admin-panel-section" id="panel-events-mgmt">
+            <div class="add-form">
+              <h3>Add New Event</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <input type="text" id="event-title" placeholder="Event name">
+                <input type="date" id="event-date">
+              </div>
+              <input type="text" id="event-location" placeholder="Location">
+              <textarea id="event-desc" rows="2" placeholder="Event description..."></textarea>
+              <button class="btn-add" onclick="addEvent()">Add Event</button>
+            </div>
+            <table class="admin-table"><thead><tr><th>Event</th><th>Date</th><th>Location</th><th>Action</th></tr></thead>
+            <tbody id="events-tbody"></tbody></table>
+          </div>
+
+          <div class="admin-panel-section" id="panel-achieve-mgmt">
+            <div class="add-form">
+              <h3>Feature an Achievement</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <input type="text" id="achieve-name" placeholder="Alumni name">
+                <input type="text" id="achieve-batch" placeholder="Batch / SSC year">
+              </div>
+              <input type="text" id="achieve-title" placeholder="Achievement title">
+              <textarea id="achieve-desc" rows="2" placeholder="Describe the achievement..."></textarea>
+              <input type="text" id="achieve-icon" placeholder="Emoji icon (e.g. 🏆 🎓 🚀)">
+              <button class="btn-add" onclick="addAchievement()">Feature Achievement</button>
+            </div>
+            <table class="admin-table"><thead><tr><th>Name</th><th>Batch</th><th>Achievement</th><th>Action</th></tr></thead>
+            <tbody id="achieve-tbody"></tbody></table>
+          </div>
+
+          <!-- SCHOOL PHOTO MANAGEMENT -->
+          <div class="admin-panel-section" id="panel-photo-mgmt">
+            <div class="add-form">
+              <h3>🖼️ Change School Photo</h3>
+              <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">This photo appears at the top of the Home page. Click below to upload a new one.</p>
+              <div id="photo-current-preview" style="margin-bottom:16px;">
+                <img id="admin-school-preview" src="school.jpg" alt="Current school photo"
+                  style="width:100%;max-height:260px;object-fit:cover;border-radius:10px;border:2px solid var(--border);">
+                <p style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center;">Current photo</p>
+              </div>
+              <label style="display:block;border:2px dashed #d1d5db;border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:var(--cream);transition:all 0.2s;" id="school-upload-label">
+                <div style="font-size:28px;margin-bottom:8px;">📷</div>
+                <p style="font-size:14px;font-weight:600;color:var(--navy);">Click to upload new school photo</p>
+                <p style="font-size:12px;color:var(--muted);margin-top:4px;">JPG, PNG recommended. Wide/landscape photos look best.</p>
+                <input type="file" id="school-photo-upload" accept="image/*" style="display:none;" onchange="changeSchoolPhoto(this)">
+              </label>
+              <div id="school-photo-success" style="display:none;margin-top:16px;background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:12px;text-align:center;color:var(--green);font-weight:600;">
+                ✅ School photo updated!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>Made with ❤️ for <span>সাঁড়া ঝাউদিয়া উচ্চ বিদ্যালয়</span> Alumni</p>
+  <p style="margin-top:6px;">গ্রামঃ সাঁড়া ঝাউদিয়া, ডাকঘরঃ পাকশী, ঈশ্বরদী, পাবনা &nbsp;·&nbsp; EIIN: <span>125530</span> &nbsp;·&nbsp; <a href="https://sarajhaudiahighschool.edu.bd/" target="_blank" style="color:var(--gold);text-decoration:none;">sarajhaudiahighschool.edu.bd</a></p>
+  <p style="margin-top:6px;font-size:11px;">🔒 Data stored locally. Connect Firebase for live database.</p>
+</footer>
+
+<!-- JS FILES — ORDER MATTERS -->
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/register.js"></script>
+<script src="js/directory.js"></script>
+<script src="js/memories.js"></script>
+<script src="js/notices.js"></script>
+<script src="js/events.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
